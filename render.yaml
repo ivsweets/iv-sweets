@@ -1,7 +1,7 @@
 services:
   - type: web
     name: iv-sweets
-    runtime: python3
+    runtime: python3.11
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn iv_sweets.wsgi:application
     envVars:
