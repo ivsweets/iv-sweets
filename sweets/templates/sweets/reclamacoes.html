@@ -1,0 +1,167 @@
+{% extends "sweets/base_corrigido_final.html" %}
+
+{% block title %}Reclamações - iv_Sweets{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="hero-title">💬 Reclamações e Sugestões</h1>
+                <p class="hero-subtitle">Sua opinião é muito importante para nós</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <!-- Formulário de Reclamação -->
+                <div class="card mb-5">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="fas fa-comment-dots me-2"></i>
+                            Envie sua Reclamação ou Sugestão
+                        </h3>
+
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="assunto" class="form-label">
+                                    <i class="fas fa-tag me-2"></i>Assunto
+                                </label>
+                                <input type="text" class="form-control" id="assunto" name="assunto"
+                                       placeholder="Ex: Problema com entrega, Sugestão de produto..." required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="mensagem" class="form-label">
+                                    <i class="fas fa-pencil-alt me-2"></i>Mensagem
+                                </label>
+                                <textarea class="form-control" id="mensagem" name="mensagem" rows="5"
+                                          placeholder="Descreva sua reclamação ou sugestão em detalhes..." required></textarea>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>Enviar Reclamação
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Histórico de Reclamações -->
+                {% if reclamacoes %}
+                    <h4 class="mb-3">
+                        <i class="fas fa-history me-2"></i>
+                        Suas Reclamações Anteriores
+                    </h4>
+
+                    {% for reclamacao in reclamacoes %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="card-title">{{ reclamacao.assunto }}</h6>
+                                        <p class="card-text text-muted">{{ reclamacao.mensagem }}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ reclamacao.created_at|date:"d/m/Y H:i" }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-{% if reclamacao.status == 'nova' %}warning{% elif reclamacao.status == 'lida' %}info{% elif reclamacao.status == 'respondida' %}primary{% else %}success{% endif %}">
+                                            {{ reclamacao.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Informações de Contato -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-12 mb-4">
+                <h3>Outras Formas de Contato</h3>
+                <p class="text-muted">Além do formulário acima, você também pode nos contatar através de:</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-phone fa-3x text-primary mb-3"></i>
+                    <h5>Telefone</h5>
+                    <p class="text-muted">+258 875914693</p>
+                    <small class="text-muted">Segunda a Sexta: 8h às 18h</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                    <h5>Email</h5>
+                    <p class="text-muted">ivsweets50@gmail.com</p>
+                    <small class="text-muted">Respondemos em até 24h</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Compromisso -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h3>Nosso Compromisso</h3>
+                <p class="text-muted mb-4">
+                    Valorizamos cada feedback e nos comprometemos a responder todas as reclamações
+                    em até 24 horas úteis.
+                </p>
+                <div class="row">
+                    <div class="col-md-3">
+                        <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                        <h6>Resposta Rápida</h6>
+                        <small class="text-muted">Até 24h úteis</small>
+                    </div>
+                    <div class="col-md-3">
+                        <i class="fas fa-search fa-2x text-primary mb-2"></i>
+                        <h6>Investigação Completa</h6>
+                        <small class="text-muted">Análise detalhada</small>
+                    </div>
+                    <div class="col-md-3">
+                        <i class="fas fa-tools fa-2x text-primary mb-2"></i>
+                        <h6>Solução Eficaz</h6>
+                        <small class="text-muted">Problemas resolvidos</small>
+                    </div>
+                    <div class="col-md-3">
+                        <i class="fas fa-star fa-2x text-primary mb-2"></i>
+                        <h6>Melhorias Contínuas</h6>
+                        <small class="text-muted">Baseado no feedback</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

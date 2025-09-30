@@ -1,0 +1,161 @@
+{% extends "sweets/base_corrigido_final.html" %}
+{% load static %}
+
+{% block title %}Admin Encomendas - IV Sweets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Gerir Encomendas</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Foto do Artigo</th>
+                <th>Cliente</th>
+                <th>Descrição Cliente</th>
+                <th>Imagens de Referência</th>
+                <th>Imagem Comprovativo</th>
+                <th>Data Criação</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for encomenda in encomendas %}
+            <tr>
+                <td>{{ encomenda.id }}</td>
+                <td>
+                    {% if encomenda.itens.first %}
+                        {% if encomenda.itens.first.produto.imagem %}
+                            <img src="{{ encomenda.itens.first.produto.imagem.url }}" alt="Produto" style="width: 50px; height: 50px; object-fit: cover;">
+                        {% else %}
+                            <span class="text-muted">Sem imagem</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted">Sem itens</span>
+                    {% endif %}
+                </td>
+                <td>{{ encomenda.usuario.username }}</td>
+                <td>
+                    {{ encomenda.usuario.first_name }} {{ encomenda.usuario.last_name }}
+                    {% if encomenda.usuario.first_name or encomenda.usuario.last_name %}
+                        ({{ encomenda.usuario.email }})
+                    {% endif %}
+                </td>
+                <td>
+                    {% if encomenda.imagem_referencia_1 or encomenda.imagem_referencia_2 %}
+                        <div class="d-flex gap-1">
+                            {% if encomenda.imagem_referencia_1 %}
+                                <img src="{{ encomenda.imagem_referencia_1.url }}" alt="Ref 1" style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;" onclick="openImageModal('{{ encomenda.imagem_referencia_1.url }}')">
+                            {% endif %}
+                            {% if encomenda.imagem_referencia_2 %}
+                                <img src="{{ encomenda.imagem_referencia_2.url }}" alt="Ref 2" style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;" onclick="openImageModal('{{ encomenda.imagem_referencia_2.url }}')">
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <span class="text-muted">Sem referência</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if encomenda.comprovativopagamento_set.first.comprovativo %}
+                        <img src="{{ encomenda.comprovativopagamento_set.first.comprovativo.url }}" alt="Comprovativo" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <span class="text-muted">Sem comprovativo</span>
+                    {% endif %}
+                </td>
+                <td>{{ encomenda.created_at|date:"d/m/Y H:i" }}</td>
+                <td>MT {{ encomenda.total }}</td>
+                <td>
+                    <span class="badge {% if encomenda.status == 'entregue' %}bg-success{% elif encomenda.status == 'pendente' %}bg-warning{% else %}bg-info{% endif %}">
+                        {{ encomenda.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'sweets:admin_encomenda_detalhe' encomenda.id %}" class="btn btn-sm btn-primary">Ver Detalhes</a>
+                    {% if encomenda.status == 'pendente' %}
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="encomenda_id" value="{{ encomenda.id }}">
+                        <button type="submit" name="action" value="update_status" class="btn btn-sm btn-success">Confirmar</button>
+                        <input type="hidden" name="status" value="confirmada">
+                    </form>
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="encomenda_id" value="{{ encomenda.id }}">
+                        <button type="submit" name="action" value="update_status" class="btn btn-sm btn-danger">Cancelar</button>
+                        <input type="hidden" name="status" value="cancelada">
+                    </form>
+                    {% endif %}
+                    {% if encomenda.status == 'confirmada' %}
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="encomenda_id" value="{{ encomenda.id }}">
+                        <button type="submit" name="action" value="update_status" class="btn btn-sm btn-info">Em Preparo</button>
+                        <input type="hidden" name="status" value="em_preparo">
+                    </form>
+                    {% endif %}
+                    {% if encomenda.status == 'em_preparo' %}
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="encomenda_id" value="{{ encomenda.id }}">
+                        <button type="submit" name="action" value="update_status" class="btn btn-sm btn-warning">Pronta</button>
+                        <input type="hidden" name="status" value="pronta">
+                    </form>
+                    {% endif %}
+                    {% if encomenda.status == 'pronta' %}
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="encomenda_id" value="{{ encomenda.id }}">
+                        <button type="submit" name="action" value="update_status" class="btn btn-sm btn-success">Entregue</button>
+                        <input type="hidden" name="status" value="entregue">
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="text-center">Nenhuma encomenda encontrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'sweets:admin_dashboard' %}" class="btn btn-secondary">Voltar ao Dashboard</a>
+</div>
+
+<script>
+function openImageModal(imageUrl) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Imagem de Referência</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="${imageUrl}" alt="Imagem de Referência" class="img-fluid" style="max-width: 100%; max-height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <a href="${imageUrl}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>Abrir em Nova Aba
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const bootstrap = window.bootstrap;
+    const modalInstance = new bootstrap.Modal(modal);
+    modalInstance.show();
+
+    modal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+    });
+}
+</script>
+{% endblock %}

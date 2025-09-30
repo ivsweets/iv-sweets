@@ -1,0 +1,102 @@
+{% extends "sweets/base_corrigido_final.html" %}
+{% load static %}
+
+{% block title %}Admin Comprovativos - IV Sweets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Gerir Comprovativos de Pagamento</h1>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Encomenda</th>
+                <th>Cliente</th>
+                <th>Produto</th>
+                <th>Data Upload</th>
+                <th>Comprovativo</th>
+                <th>Status</th>
+                <th>Motivo Rejeição</th>
+                <th>Observações</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comprovativo in comprovativos %}
+            <tr>
+                <td>{{ comprovativo.id }}</td>
+                <td>#{{ comprovativo.encomenda.id }}</td>
+                <td>{{ comprovativo.encomenda.usuario.username }}</td>
+                <td>
+                    {% for item in comprovativo.encomenda.itens.all %}
+                        {{ item.produto.nome }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Nenhum produto
+                    {% endfor %}
+                </td>
+                <td>{{ comprovativo.enviado_em|date:"d/m/Y H:i" }}</td>
+                <td>
+                    {% if comprovativo.comprovativo %}
+                    <a href="{{ comprovativo.comprovativo.url }}" target="_blank" class="btn btn-sm btn-primary">Ver</a>
+                    {% else %}
+                    Nenhum
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge {% if comprovativo.status == 'aprovado' %}bg-success{% elif comprovativo.status == 'rejeitado' %}bg-danger{% else %}bg-warning{% endif %}">
+                        {{ comprovativo.status|title }}
+                    </span>
+                </td>
+                <td>{{ comprovativo.motivo_rejeicao|default:"N/A" }}</td>
+                <td>{{ comprovativo.observacoes|default:"Nenhuma" }}</td>
+                <td>
+                    {% if comprovativo.status == 'pendente' %}
+                    <form method="post" style="display:inline;" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="comprovativo_id" value="{{ comprovativo.id }}">
+                        <button type="submit" name="action" value="aprovar" class="btn btn-sm btn-success me-1">Aprovar</button>
+                    </form>
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ comprovativo.id }}">Rejeitar</button>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <!-- Modal para Rejeitar Comprovativo -->
+            <div class="modal fade" id="rejectModal{{ comprovativo.id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ comprovativo.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="rejectModalLabel{{ comprovativo.id }}">Rejeitar Comprovativo #{{ comprovativo.id }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <input type="hidden" name="comprovativo_id" value="{{ comprovativo.id }}">
+                                <input type="hidden" name="action" value="rejeitar">
+                                <div class="mb-3">
+                                    <label for="motivo_rejeicao{{ comprovativo.id }}" class="form-label">Motivo da Rejeição</label>
+                                    <textarea class="form-control" id="motivo_rejeicao{{ comprovativo.id }}" name="motivo_rejeicao" rows="3" placeholder="Descreva o motivo da rejeição..." required></textarea>
+                                    <div class="form-text">Este motivo será salvo e pode ser visto pelo cliente.</div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-danger">Confirmar Rejeição</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="text-center">Nenhum comprovativo encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{% url 'sweets:admin_dashboard' %}" class="btn btn-secondary">Voltar ao Dashboard</a>
+</div>
+{% endblock %}

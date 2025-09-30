@@ -1,0 +1,83 @@
+{% extends "sweets/base_corrigido_final.html" %}
+
+{% block title %}Catálogo - iv_Sweets{% endblock %}
+
+{% block content %}
+<!-- Hero Section com Logo -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="hero-title">🍰 Nosso Catálogo</h1>
+                <p class="hero-subtitle">Descubra nossos deliciosos bolos artesanais</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filtros -->
+<section class="py-3 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <form method="get" class="d-flex">
+                    <input type="text" name="busca" class="form-control me-2"
+                           placeholder="Buscar produtos..." value="{{ busca }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <form method="get">
+                    <select name="categoria" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todas as categorias</option>
+                        {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}" {% if categoria.id == categoria_selecionada %}selected{% endif %}>
+                                {{ categoria.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Produtos -->
+<section class="py-5">
+    <div class="container">
+        {% if produtos %}
+            <div class="row">
+                {% for produto in produtos %}
+                    <div class="col-md-4 col-lg-3 mb-4">
+                        <div class="card product-card h-100">
+                            {% if produto.imagem %}
+                                <img src="{{ produto.imagem.url }}" class="card-img-top product-image" alt="{{ produto.nome }}">
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ produto.nome }}</h5>
+                                <p class="card-text text-dark small flex-grow-1">
+                                    {{ produto.descricao|truncatechars:100 }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <span class="price-tag">MT {{ produto.preco }}</span>
+                                    <a href="{% url 'sweets:produto_detalhe' produto.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Ver
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-dark mb-3"></i>
+                <h3>Nenhum produto encontrado</h3>
+                <p class="text-dark">Tente ajustar os filtros de busca.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

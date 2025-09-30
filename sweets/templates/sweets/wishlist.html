@@ -1,0 +1,57 @@
+{% extends 'sweets/base_iv_sweets_final.html' %}
+{% load static %}
+
+{% block title %}Minha Lista de Desejos - iv_Sweets{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">Minha Lista de Desejos</h1>
+
+            {% if produtos %}
+                <div class="row">
+                    {% for produto in produtos %}
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="card h-100">
+                                {% if produto.imagem %}
+                                    <img src="{{ produto.imagem.url }}" class="card-img-top" alt="{{ produto.nome }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'images/no-image.png' %}" class="card-img-top" alt="Sem imagem" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ produto.nome }}</h5>
+                                    <p class="card-text">{{ produto.descricao|truncatechars:100 }}</p>
+                                    <p class="card-text"><strong>{{ produto.preco }} MT</strong></p>
+
+                                    <div class="mt-auto">
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'produto_detalhe' produto.id %}" class="btn btn-primary flex-fill">Ver Detalhes</a>
+                                            {% if user.is_authenticated %}
+                                                <a href="{% url 'adicionar_ao_carrinho' produto.id %}" class="btn btn-success">Adicionar ao Carrinho</a>
+                                            {% else %}
+                                                <a href="{% url 'login' %}" class="btn btn-outline-success">Login para Comprar</a>
+                                            {% endif %}
+                                        </div>
+                                        <a href="{% url 'remover_da_wishlist' produto.id %}" class="btn btn-outline-danger btn-sm mt-2 w-100">
+                                            <i class="fas fa-heart-broken"></i> Remover da Lista
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <i class="fas fa-heart fa-4x text-muted mb-3"></i>
+                    <h3>Sua lista de desejos está vazia</h3>
+                    <p>Explore nosso catálogo e adicione produtos que você gosta!</p>
+                    <a href="{% url 'catalogo' %}" class="btn btn-primary">Ver Catálogo</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

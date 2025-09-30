@@ -1,0 +1,254 @@
+{% extends 'sweets/base_corrigido_final.html' %}
+{% load static %}
+
+{% block title %}Efetuar Pagamento - Encomenda #{{ encomenda.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4 text-center">Efetuar Pagamento</h2>
+
+            <!-- Resumo da Encomenda -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Resumo da Encomenda #{{ encomenda.id }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Cliente:</strong> {{ encomenda.usuario.username }}</p>
+                            <p><strong>Data:</strong> {{ encomenda.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <p><strong>Total a Pagar:</strong></p>
+                            <h3 class="text-primary">{{ encomenda.total }} MT</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulário de Pagamento -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Informações de Pagamento</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="paymentForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="metodo_pagamento" class="form-label">Método de Pagamento *</label>
+                            <select class="form-select" id="metodo_pagamento" name="metodo_pagamento" required>
+                                <option value="">Selecione o método de pagamento</option>
+                                <option value="emola">E-MOLA</option>
+                                <option value="mpesa">M-PESA</option>
+                                <option value="bim">BIM</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="numero_referencia" class="form-label">Número de Referência *</label>
+                            <input type="text" class="form-control" id="numero_referencia" name="numero_referencia"
+                                   placeholder="Digite o número de referência do pagamento" required>
+                            <div class="form-text">Número de transação ou referência do pagamento</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="comprovativo" class="form-label">Comprovativo de Pagamento *</label>
+                            <input type="file" class="form-control" id="comprovativo" name="comprovativo"
+                                   accept="image/*,.pdf" required>
+                            <div class="form-text">Envie uma imagem ou PDF do comprovativo (máx. 10MB)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observacoes" class="form-label">Observações</label>
+                            <textarea class="form-control" id="observacoes" name="observacoes"
+                                      rows="3" placeholder="Adicione observações sobre o pagamento (opcional)"></textarea>
+                            <div class="form-text">Adicione qualquer informação adicional sobre o pagamento</div>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="mb-3" id="imagePreview" style="display: none;">
+                            <label class="form-label">Pré-visualização do Comprovativo:</label>
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <img id="previewImg" src="" alt="Pré-visualização" class="img-fluid rounded shadow" style="max-width: 100%; max-height: 300px;">
+                                    <p class="mt-2 mb-0"><small class="text-muted">Imagem carregada com sucesso!</small></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informações de Pagamento por Método -->
+                        <div id="paymentInfo" class="alert alert-info" style="display: none;">
+                            <h6>Como efetuar o pagamento:</h6>
+                            <div id="paymentInstructions"></div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'sweets:encomenda_detalhe' encomenda.id %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Enviar Comprovativo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Instruções de Pagamento -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Instruções de Pagamento</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="paymentAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingEmola">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEmola">
+                                    <strong>E-MOLA</strong>
+                                </button>
+                            </h2>
+                            <div id="collapseEmola" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Para pagar via E-MOLA:</strong></p>
+                                    <ol>
+                                        <li>Abra o aplicativo E-MOLA no seu telemóvel</li>
+                                        <li>Selecione "Pagar" ou "Transferir"</li>
+                                        <li>Digite o número: <strong>87 591 4693</strong></li>
+                                        <li>Insira o valor: <strong>{{ encomenda.total }} MT</strong></li>
+                                        <li>Na referência, digite: <strong>ENCOMENDA-{{ encomenda.id }}</strong></li>
+                                        <li>Confirme o pagamento</li>
+                                        <li>Tire uma captura de ecrã do comprovativo</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingMpesa">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMpesa">
+                                    <strong>M-PESA</strong>
+                                </button>
+                            </h2>
+                            <div id="collapseMpesa" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Para pagar via M-PESA:</strong></p>
+                                    <ol>
+                                        <li>Abra o aplicativo M-PESA no seu telemóvel</li>
+                                        <li>Selecione "Pagar" ou "Transferir para Número"</li>
+                                        <li>Digite o número: <strong>85 813 4018</strong></li>
+                                        <li>Insira o valor: <strong>{{ encomenda.total }} MT</strong></li>
+                                        <li>Na referência, digite: <strong>ENCOMENDA-{{ encomenda.id }}</strong></li>
+                                        <li>Confirme o pagamento</li>
+                                        <li>Tire uma captura de ecrã do comprovativo</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingBIM">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBIM">
+                                    <strong>BIM (Transferência Bancária)</strong>
+                                </button>
+                            </h2>
+                            <div id="collapseBIM" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Para pagar via Transferência Bancária:</strong></p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Banco:</strong> BIM</p>
+                                            <p><strong>Número da Conta:</strong> 1209195793</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>Titular:</strong> IVONETE NAITE MUZORORA</p>
+                                            <p><strong>Valor:</strong> {{ encomenda.total }} MT</p>
+                                        </div>
+                                    </div>
+                                    <p><strong>Referência:</strong> ENCOMENDA-{{ encomenda.id }}</p>
+                                    <p><small class="text-muted">Envie o comprovativo da transferência bancária</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('metodo_pagamento').addEventListener('change', function() {
+    const metodo = this.value;
+    const paymentInfo = document.getElementById('paymentInfo');
+    const paymentInstructions = document.getElementById('paymentInstructions');
+
+    if (metodo) {
+        paymentInfo.style.display = 'block';
+
+        switch(metodo) {
+            case 'emola':
+                paymentInstructions.innerHTML = `
+                    <p><strong>Pagamento via E-MOLA:</strong></p>
+                    <ul>
+                        <li>Número: <strong>87 591 4693</strong></li>
+                        <li>Valor: <strong>${{ encomenda.total }} MT</strong></li>
+                        <li>Referência: <strong>ENCOMENDA-${{ encomenda.id }}</strong></li>
+                    </ul>
+                `;
+                break;
+            case 'mpesa':
+                paymentInstructions.innerHTML = `
+                    <p><strong>Pagamento via M-PESA:</strong></p>
+                    <ul>
+                        <li>Número: <strong>85 813 4018</strong></li>
+                        <li>Valor: <strong>${{ encomenda.total }} MT</strong></li>
+                        <li>Referência: <strong>ENCOMENDA-${{ encomenda.id }}</strong></li>
+                    </ul>
+                `;
+                break;
+            case 'bim':
+                paymentInstructions.innerHTML = `
+                    <p><strong>Transferência Bancária - BIM:</strong></p>
+                    <ul>
+                        <li>Banco: BIM</li>
+                        <li>Conta: 1209195793</li>
+                        <li>Valor: <strong>${{ encomenda.total }} MT</strong></li>
+                        <li>Referência: <strong>ENCOMENDA-${{ encomenda.id }}</strong></li>
+                    </ul>
+                `;
+                break;
+        }
+    } else {
+        paymentInfo.style.display = 'none';
+    }
+});
+
+// Image preview functionality
+document.getElementById('comprovativo').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+
+    if (file) {
+        // Check if file is an image
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // Hide preview if not an image
+            imagePreview.style.display = 'none';
+            alert('Por favor, selecione uma imagem válida.');
+        }
+    } else {
+        imagePreview.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

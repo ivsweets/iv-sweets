@@ -1,0 +1,76 @@
+{% extends "sweets/base_corrigido_final.html" %}
+
+{% block title %}Carrinho de Compras - iv_Sweets{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Seu Carrinho
+                </h1>
+
+                {% if carrinho.itens.all %}
+                    <div class="card">
+                        <div class="card-body">
+                            {% for item in carrinho.itens.all %}
+                                <div class="row align-items-center mb-3 pb-3 border-bottom">
+                                    <div class="col-md-2">
+                                        {% if item.produto.imagem %}
+                                            <img src="{{ item.produto.imagem.url }}" class="img-fluid rounded" alt="{{ item.produto.nome }}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h5>{{ item.produto.nome }}</h5>
+                                        <p class="text-dark small">{{ item.produto.categoria.nome }}</p>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <form method="post" action="{% url 'sweets:atualizar_quantidade_carrinho' item.id %}" class="d-flex">
+                                            {% csrf_token %}
+                                            <input type="number" name="quantidade" value="{{ item.quantidade }}"
+                                                   class="form-control form-control-sm me-2" min="1" style="width: 70px;">
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <strong class="price-tag">MT {{ item.subtotal }}</strong>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="{% url 'sweets:remover_carrinho' item.id %}" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h4>Total: <span class="price-tag">MT {{ carrinho.total }}</span></h4>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a href="{% url 'sweets:finalizar_encomenda' %}" class="btn btn-success btn-lg">
+                                        <i class="fas fa-credit-card me-2"></i>Finalizar Encomenda
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-3x text-dark mb-3"></i>
+                        <h3>Seu carrinho está vazio</h3>
+                        <p class="text-dark mb-4">Adicione alguns produtos deliciosos ao seu carrinho!</p>
+                        <a href="/catalogo/" class="btn btn-primary btn-lg">
+                            <i class="fas fa-list me-2"></i>Ver Catálogo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

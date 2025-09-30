@@ -1,0 +1,64 @@
+{% extends "sweets/base_corrigido_final.html" %}
+
+{% block title %}Minhas Encomendas - iv_Sweets{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-box me-2"></i>Minhas Encomendas</h2>
+                    <a href="{% url 'sweets:catalogo' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nova Encomenda
+                    </a>
+                </div>
+
+                {% if encomendas %}
+                    <div class="row">
+                        {% for encomenda in encomendas %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">Encomenda #{{ encomenda.id }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Status:</strong>
+                                            <span class="badge bg-{% if encomenda.status == 'pendente' %}warning{% elif encomenda.status == 'confirmada' %}info{% elif encomenda.status == 'em_preparo' %}primary{% elif encomenda.status == 'pronta' %}success{% elif encomenda.status == 'entregue' %}success{% else %}danger{% endif %}">
+                                                {{ encomenda.get_status_display }}
+                                            </span>
+                                        </p>
+                                        <p><strong>Total:</strong> {{ encomenda.total }} MT</p>
+                                        <p><strong>Data:</strong> {{ encomenda.created_at|date:"d/m/Y H:i" }}</p>
+                                        <p><strong>Itens:</strong> {{ encomenda.itens.count }}</p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="{% url 'sweets:encomenda_detalhe' encomenda.id %}" class="btn btn-outline-primary btn-sm w-100">
+                                            <i class="fas fa-eye me-1"></i>Ver Detalhes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Nenhuma encomenda encontrada</h4>
+                        <p class="text-muted">Você ainda não fez nenhuma encomenda.</p>
+                        <a href="{% url 'sweets:catalogo' %}" class="btn btn-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>Ver Catálogo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function verDetalhes(encomendaId) {
+    alert('Detalhes da encomenda #' + encomendaId + ' serão implementados em breve!');
+}
+</script>
+{% endblock %}

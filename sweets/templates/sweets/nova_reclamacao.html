@@ -1,0 +1,24 @@
+{% extends 'sweets/base.html' %}
+{% load static %}
+
+{% block title %}Nova Reclamação - IV Sweets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Submeter Nova Reclamação</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="assunto" class="form-label">Assunto</label>
+            <input type="text" class="form-control" id="assunto" name="assunto" required>
+        </div>
+        <div class="mb-3">
+            <label for="mensagem" class="form-label">Mensagem</label>
+            <textarea class="form-control" id="mensagem" name="mensagem" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submeter Reclamação</button>
+        <a href="{% url 'reclamacoes' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

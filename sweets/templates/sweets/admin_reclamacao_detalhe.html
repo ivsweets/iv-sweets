@@ -1,0 +1,36 @@
+{% extends 'sweets/base.html' %}
+{% load static %}
+
+{% block title %}Detalhes da Reclamação - IV Sweets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Detalhes da Reclamação</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>{{ reclamacao.titulo }}</h5>
+        </div>
+        <div class="card-body">
+            <p>{{ reclamacao.descricao }}</p>
+            <small class="text-muted">Submetida por {{ reclamacao.cliente.username }} em {{ reclamacao.data_criacao|date:"d/m/Y H:i" }}</small>
+        </div>
+    </div>
+    
+    {% if reclamacao.respondida %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Resposta</h5>
+        </div>
+        <div class="card-body">
+            <p>{{ reclamacao.resposta }}</p>
+            <small class="text-muted">Respondida em {{ reclamacao.data_resposta|date:"d/m/Y H:i" }}</small>
+        </div>
+    </div>
+    {% else %}
+    <a href="{% url 'admin_responder_reclamacao' reclamacao.id %}" class="btn btn-primary">Responder</a>
+    {% endif %}
+    
+    <a href="{% url 'admin_reclamacoes' %}" class="btn btn-secondary">Voltar</a>
+</div>
+{% endblock %}

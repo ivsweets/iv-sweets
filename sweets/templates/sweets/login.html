@@ -1,0 +1,110 @@
+{% extends "sweets/base_corrigido_final.html" %}
+
+{% block title %}Login - iv_Sweets{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h1 class="display-4 mb-4">
+                    <i class="fas fa-birthday-cake text-primary me-3"></i>
+                    Bem-vindo ao iv_Sweets!
+                </h1>
+                <p class="lead text-muted">
+                    Entre na sua conta para acessar os melhores bolos Moçambique
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Login Form -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-user-circle fa-4x text-primary mb-3"></i>
+                            <h2 class="card-title fw-bold">Login</h2>
+                            <p class="text-muted">Digite suas credenciais para continuar</p>
+                        </div>
+
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label for="username" class="form-label fw-bold">
+                                    <i class="fas fa-user me-2"></i>Nome de Usuário
+                                </label>
+                                <input type="text" class="form-control form-control-lg"
+                                       id="username" name="username"
+                                       placeholder="Digite seu nome de usuário" required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-bold">
+                                    <i class="fas fa-lock me-2"></i>Senha
+                                </label>
+                                <input type="password" class="form-control form-control-lg"
+                                       id="password" name="password"
+                                       placeholder="Digite sua senha" required>
+                            </div>
+
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Entrar na Conta
+                                </button>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="mb-2">Não tem uma conta?</p>
+                                <a href="{% url 'sweets:register' %}" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-user-plus me-2"></i>Criar Nova Conta
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="card mt-4 border-primary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star text-warning fa-2x mb-3"></i>
+                        <h5 class="text-primary">Por que criar uma conta?</h5>
+                        <ul class="list-unstyled text-start mt-3">
+                            <li class="mb-2">
+                                <i class="fas fa-shopping-cart text-success me-2"></i>
+                                Acesso ao carrinho de compras
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-box text-info me-2"></i>
+                                Rastreamento de encomendas
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-comments text-warning me-2"></i>
+                                Sistema de reclamações
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-gift text-danger me-2"></i>
+                                Ofertas exclusivas
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

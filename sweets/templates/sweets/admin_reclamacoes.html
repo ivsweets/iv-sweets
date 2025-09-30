@@ -1,0 +1,59 @@
+{% extends "sweets/base_corrigido_final.html" %}
+{% load static %}
+
+{% block title %}Admin Reclamações - IV Sweets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Gerir Reclamações</h1>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Status</th>
+                <th>Resposta</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reclamacao in reclamacoes %}
+            <tr>
+                <td>{{ reclamacao.id }}</td>
+                <td>{{ reclamacao.assunto }}</td>
+                <td>{{ reclamacao.usuario.username }}</td>
+                <td>{{ reclamacao.created_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <span class="badge {% if reclamacao.status == 'respondida' %}bg-success{% else %}bg-warning{% endif %}">
+                        {{ reclamacao.status|title }}
+                    </span>
+                </td>
+                <td>
+                    {% if reclamacao.status == 'nova' %}
+                        <form method="post" action="{% url 'sweets:admin_responder_reclamacao' reclamacao.id %}">
+                            {% csrf_token %}
+                            <textarea name="resposta" class="form-control" rows="2" placeholder="Digite a resposta..." required></textarea>
+                            <button type="submit" class="btn btn-sm btn-primary mt-1">Responder</button>
+                        </form>
+                    {% else %}
+                        {{ reclamacao.resposta|truncatechars:50 }}
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'sweets:admin_reclamacao_detalhe' reclamacao.id %}" class="btn btn-sm btn-primary">Ver Detalhes</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">Nenhuma reclamação encontrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{% url 'sweets:admin_dashboard' %}" class="btn btn-secondary">Voltar ao Dashboard</a>
+</div>
+{% endblock %}

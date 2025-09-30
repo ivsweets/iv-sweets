@@ -1,0 +1,147 @@
+{% extends 'sweets/base.html' %}
+
+{% block title %}Chat com {{ user.username }} - Admin - IV Sweets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-comments"></i> Conversa com {{ user.username }}</h4>
+                    <div>
+                        <a href="{% url 'sweets:admin_chats' %}" class="btn btn-light btn-sm mr-2">
+                            <i class="fas fa-arrow-left"></i> Voltar às Conversas
+                        </a>
+                        <a href="{% url 'sweets:admin_dashboard' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="chat-messages" class="chat-messages mb-3" style="height: 500px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; background-color: #f8f9fa;">
+                        {% for message in mensagens %}
+                        <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %} mb-3">
+                            <div class="message-content p-3 rounded">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>{{ message.sender.username }}:</strong>
+                                        {% if message.message %}
+                                        <div class="mt-1">{{ message.message }}</div>
+                                        {% endif %}
+                                        {% if message.attachment %}
+                                        <div class="mt-2">
+                                            <a href="{{ message.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-paperclip"></i> {{ message.attachment.name|truncatechars:30 }}
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">{{ message.timestamp|date:"d/m/Y H:i" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <form id="chat-form" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="input-group mb-2">
+                            <input type="text" name="message" id="message-input" class="form-control" placeholder="Digite sua resposta..." maxlength="500">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="attachment-input" name="attachment">
+                                <label class="custom-file-label" for="attachment-input">Escolher arquivo (opcional)</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-messages .message.sent {
+    text-align: right;
+}
+.chat-messages .message.sent .message-content {
+    background-color: #007bff;
+    color: white;
+    display: inline-block;
+    max-width: 70%;
+    border-radius: 10px 10px 0 10px;
+}
+.chat-messages .message.received .message-content {
+    background-color: #e9ecef;
+    color: black;
+    display: inline-block;
+    max-width: 70%;
+    border-radius: 10px 10px 10px 0;
+}
+.message-content small {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageInput = document.getElementById('message-input');
+    const chatForm = document.getElementById('chat-form');
+
+    // Scroll to bottom on load
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Auto-refresh messages every 3 seconds
+    setInterval(function() {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newMessages = doc.getElementById('chat-messages');
+                if (newMessages) {
+                    chatMessages.innerHTML = newMessages.innerHTML;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            });
+    }, 3000);
+
+    // Handle form submission with AJAX
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(chatForm);
+
+        fetch('{% url "sweets:send_message_admin" user.id %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageInput.value = '';
+                // Refresh messages
+                location.reload();
+            } else {
+                alert('Erro ao enviar mensagem: ' + (data.error || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro ao enviar mensagem');
+        });
+    });
+});
+</script>
+{% endblock %}

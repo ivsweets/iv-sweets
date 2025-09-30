@@ -1,0 +1,346 @@
+{% extends "sweets/base_corrigido_final.html" %}
+{% load static %}
+
+{% block title %}Detalhe da Encomenda - iv_sweets{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Detalhes da Encomenda #{{ encomenda.id }}</h2>
+                <div>
+                    <a href="{% url 'sweets:admin_comprovativos' %}" class="btn btn-info me-2">
+                        <i class="fas fa-credit-card"></i> Comprovativos
+                    </a>
+                    <a href="{% url 'sweets:admin_encomendas' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Status da Encomenda -->
+            <div class="alert {% if encomenda.status == 'pendente' %}alert-warning{% elif encomenda.status == 'confirmada' %}alert-success{% elif encomenda.status == 'em_preparo' %}alert-info{% elif encomenda.status == 'pronta' %}alert-primary{% elif encomenda.status == 'entregue' %}alert-success{% else %}alert-danger{% endif %}">
+                <strong>Status Atual:</strong> {{ encomenda.get_status_display }}
+            </div>
+
+            <!-- Formulário para alterar status -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Alterar Status da Encomenda</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Novo Status</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="">Selecione o novo status</option>
+                                    <option value="pendente" {% if encomenda.status == 'pendente' %}selected{% endif %}>Pendente</option>
+                                    <option value="confirmada" {% if encomenda.status == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                                    <option value="em_preparo" {% if encomenda.status == 'em_preparo' %}selected{% endif %}>Em Preparo</option>
+                                    <option value="pronta" {% if encomenda.status == 'pronta' %}selected{% endif %}>Pronta para Entrega</option>
+                                    <option value="entregue" {% if encomenda.status == 'entregue' %}selected{% endif %}>Entregue</option>
+                                    <option value="cancelada" {% if encomenda.status == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Atualizar Status
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Informações da Encomenda -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Informações da Encomenda</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Cliente:</strong> {{ encomenda.usuario.username }}</p>
+                                    <p><strong>Email:</strong> {{ encomenda.usuario.email }}</p>
+                                    <p><strong>Data da Encomenda:</strong> {{ encomenda.created_at|date:"d/m/Y H:i" }}</p>
+                                    <p><strong>Última Atualização:</strong> {{ encomenda.updated_at|date:"d/m/Y H:i" }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Total:</strong> {{ encomenda.total }} MT</p>
+                                    <p><strong>Status:</strong> {{ encomenda.get_status_display }}</p>
+                                    <p><strong>Número de Itens:</strong> {{ encomenda.itens.count }}</p>
+                                    {% if encomenda.descricao_encomenda %}
+                                    <p><strong>Descrição:</strong> {{ encomenda.descricao_encomenda }}</p>
+                                    {% endif %}
+                                    {% if encomenda.data_recepcao %}
+                                    <p><strong>Data de Recepção:</strong> {{ encomenda.data_recepcao|date:"d/m/Y" }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Imagens de Referência -->
+                            {% if encomenda.imagem_referencia_1 or encomenda.imagem_referencia_2 %}
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>Imagens de Referência:</h6>
+                                    <div class="row">
+                                        {% if encomenda.imagem_referencia_1 %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="text-center">
+                                                <img src="{{ encomenda.imagem_referencia_1.url }}" alt="Imagem de Referência 1" class="img-thumbnail" style="max-width: 100%; max-height: 300px; cursor: pointer;" onclick="openImageModal('{{ encomenda.imagem_referencia_1.url }}')">
+                                                <br>
+                                                <small class="text-muted">Imagem de Referência 1 - Clique para ampliar</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if encomenda.imagem_referencia_2 %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="text-center">
+                                                <img src="{{ encomenda.imagem_referencia_2.url }}" alt="Imagem de Referência 2" class="img-thumbnail" style="max-width: 100%; max-height: 300px; cursor: pointer;" onclick="openImageModal('{{ encomenda.imagem_referencia_2.url }}')">
+                                                <br>
+                                                <small class="text-muted">Imagem de Referência 2 - Clique para ampliar</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Itens da Encomenda -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Itens da Encomenda</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Produto</th>
+                                            <th>Quantidade</th>
+                                            <th>Preço Unitário</th>
+                                            <th>Subtotal</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in encomenda.itens.all %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if item.produto.imagem %}
+                                                        <img src="{{ item.produto.imagem.url }}" alt="{{ item.produto.nome }}" class="me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                    {% endif %}
+                                                    <div>
+                                                        <strong>{{ item.produto.nome }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">{{ item.produto.descricao|truncatechars:50 }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ item.quantidade }}</td>
+                                            <td>{{ item.produto.preco }} MT</td>
+                                            <td>{{ item.subtotal }} MT</td>
+                                            <td>
+                                                <a href="{% url 'sweets:admin_produto_editar' item.produto.id %}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit me-1"></i>Editar Produto
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-primary">
+                                            <th colspan="4" class="text-end">Total:</th>
+                                            <th>{{ encomenda.total }} MT</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Comprovativos de Pagamento -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Comprovativos de Pagamento</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if comprovativos %}
+                                {% for comprovativo in comprovativos %}
+                                <div class="mb-4 p-3 border rounded bg-light">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <small class="text-muted">{{ comprovativo.enviado_em|date:"d/m/Y H:i" }}</small>
+                                                    <br>
+                                                    <strong>{{ comprovativo.get_metodo_pagamento_display }}</strong>
+                                                    <br>
+                                                    <span class="badge {% if comprovativo.status == 'pendente' %}bg-warning{% elif comprovativo.status == 'aprovado' %}bg-success{% else %}bg-danger{% endif %}">
+                                                        {{ comprovativo.get_status_display }}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <a href="{{ comprovativo.comprovativo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye me-1"></i>Ver Imagem
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">Ref: {{ comprovativo.numero_referencia }}</small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">Valor: {{ comprovativo.valor }} MT</small>
+                                                </div>
+                                            </div>
+                                            {% if comprovativo.observacoes %}
+                                            <div class="mt-2">
+                                                <small class="text-muted">Observações: {{ comprovativo.observacoes }}</small>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="text-center">
+                                                <img src="{{ comprovativo.comprovativo.url }}"
+                                                     alt="Comprovativo de Pagamento"
+                                                     class="img-thumbnail"
+                                                     style="max-width: 150px; max-height: 150px; cursor: pointer;"
+                                                     onclick="openImageModal('{{ comprovativo.comprovativo.url }}')">
+                                                <br>
+                                                <small class="text-muted">Clique para ampliar</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center p-4">
+                                    <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Nenhum comprovativo enviado para esta encomenda</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Ações Rápidas -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Ações Rápidas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                {% if encomenda.status == 'pendente' %}
+                                <button type="button" class="btn btn-success" onclick="updateStatus('confirmada')">
+                                    <i class="fas fa-check"></i> Confirmar Encomenda
+                                </button>
+                                {% endif %}
+                                {% if encomenda.status == 'confirmada' %}
+                                <button type="button" class="btn btn-info" onclick="updateStatus('em_preparo')">
+                                    <i class="fas fa-cog"></i> Iniciar Preparo
+                                </button>
+                                {% endif %}
+                                {% if encomenda.status == 'em_preparo' %}
+                                <button type="button" class="btn btn-primary" onclick="updateStatus('pronta')">
+                                    <i class="fas fa-box"></i> Marcar como Pronta
+                                </button>
+                                {% endif %}
+                                {% if encomenda.status == 'pronta' %}
+                                <button type="button" class="btn btn-success" onclick="updateStatus('entregue')">
+                                    <i class="fas fa-truck"></i> Marcar como Entregue
+                                </button>
+                                {% endif %}
+                                <button type="button" class="btn btn-danger" onclick="updateStatus('cancelada')">
+                                    <i class="fas fa-times"></i> Cancelar Encomenda
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateStatus(newStatus) {
+    if (confirm(`Tem certeza que deseja alterar o status para "${getStatusLabel(newStatus)}"?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            {% csrf_token %}
+            <input type="hidden" name="status" value="${newStatus}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function getStatusLabel(status) {
+    const labels = {
+        'pendente': 'Pendente',
+        'confirmada': 'Confirmada',
+        'em_preparo': 'Em Preparo',
+        'pronta': 'Pronta para Entrega',
+        'entregue': 'Entregue',
+        'cancelada': 'Cancelada'
+    };
+    return labels[status] || status;
+}
+
+function openImageModal(imageUrl) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Comprovativo de Pagamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="${imageUrl}" alt="Comprovativo" class="img-fluid" style="max-width: 100%; max-height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <a href="${imageUrl}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>Abrir em Nova Aba
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const bootstrap = window.bootstrap;
+    const modalInstance = new bootstrap.Modal(modal);
+    modalInstance.show();
+
+    modal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+    });
+}
+</script>
+{% endblock %}

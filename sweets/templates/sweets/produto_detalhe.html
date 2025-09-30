@@ -1,0 +1,263 @@
+{% extends "sweets/base_corrigido_final.html" %}
+
+{% block title %}{{ produto.nome }} - iv_Sweets{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                {% if produto.imagem %}
+                    <img src="{{ produto.imagem.url }}" class="img-fluid rounded" alt="{{ produto.nome }}">
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Início</a></li>
+                        <li class="breadcrumb-item"><a href="/catalogo/">Catálogo</a></li>
+                        <li class="breadcrumb-item active">{{ produto.nome }}</li>
+                    </ol>
+                </nav>
+
+                <h1 class="mb-3">{{ produto.nome }}</h1>
+                <div class="mb-3">
+                    <span class="badge bg-primary">{{ produto.categoria.nome }}</span>
+                    {% if produto.disponivel %}
+                        <span class="badge bg-success ms-2">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-danger ms-2">Indisponível</span>
+                    {% endif %}
+                </div>
+
+                <h2 class="price-tag mb-4">MT {{ produto.preco }}</h2>
+
+                <!-- Average Rating Display -->
+                {% if avg_rating > 0 %}
+                    <div class="mb-3">
+                        <h6>Avaliação Média</h6>
+                        <div class="d-flex align-items-center">
+                            <div class="text-warning me-2 star-rating-large">
+                                {% for _ in full_stars %}
+                                    <i class="fas fa-star"></i>
+                                {% endfor %}
+                                {% if has_half_star %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                {% endif %}
+                                {% for _ in empty_stars %}
+                                    <i class="far fa-star"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="text-dark">{{ avg_rating|floatformat:1 }} ({{ count_avaliacoes }} avaliação{{ count_avaliacoes|pluralize }})</span>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="mb-4">
+                    <h5>Descrição</h5>
+                    <p class="text-dark">{{ produto.descricao }}</p>
+                </div>
+
+                {% if user.is_authenticated %}
+                    <!-- Formulário para Adicionar Avaliação -->
+                    {% if not user_has_rated %}
+                        <div class="mb-4">
+                            <h5>Deixe sua Avaliação</h5>
+                            <form method="post" action="{% url 'sweets:adicionar_avaliacao' produto.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="estrelas" class="form-label">Avaliação (estrelas)</label>
+                                    <select name="estrelas" id="estrelas" class="form-select" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="1">1 estrela</option>
+                                        <option value="2">2 estrelas</option>
+                                        <option value="3">3 estrelas</option>
+                                        <option value="4">4 estrelas</option>
+                                        <option value="5">5 estrelas</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="comentario" class="form-label">Comentário (opcional)</label>
+                                    <textarea name="comentario" id="comentario" class="form-control" rows="3" placeholder="Compartilhe sua opinião sobre este produto..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-star me-2"></i>Enviar Avaliação
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Você já avaliou este produto. Obrigado pela sua opinião!
+                        </div>
+                    {% endif %}
+
+                    <!-- Exibir Avaliações Existentes -->
+                    {% if produto.avaliacoes.exists %}
+                        <div class="mb-4">
+                            <h5>Avaliações dos Clientes</h5>
+                            {% for avaliacao in produto.avaliacoes.all %}
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{{ avaliacao.usuario.username }}</strong>
+                                                <div class="text-warning star-rating-large">
+                                                    {% for i in "12345" %}
+                                                        {% if forloop.counter <= avaliacao.estrelas %}
+                                                            <i class="fas fa-star"></i>
+                                                        {% else %}
+                                                            <i class="far fa-star"></i>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <small class="text-dark">{{ avaliacao.criado_em|date:"d/m/Y" }}</small>
+                                        </div>
+                                        {% if avaliacao.comentario %}
+                                            <p class="mt-2 mb-0">{{ avaliacao.comentario }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                {% if produto.disponivel %}
+                    {% if user.is_authenticated %}
+                        <div class="d-flex gap-2">
+                            <form id="add-to-cart-form" method="post" action="{% url 'sweets:adicionar_carrinho' produto.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-cart-plus me-2"></i>Adicionar ao Carrinho
+                                </button>
+                            </form>
+                            <a href="{% url 'sweets:carrinho' %}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-shopping-cart me-2"></i>Ver Carrinho
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Faça login ou cadastre-se</strong> para adicionar produtos ao carrinho e fazer encomendas.
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Fazer Login
+                            </a>
+                            <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Cadastrar-se
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Este produto está temporariamente indisponível.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Produtos Relacionados -->
+{% if produtos_relacionados %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <h3 class="text-center mb-4">🍰 Produtos Relacionados</h3>
+        <div class="row">
+            {% for produto_rel in produtos_relacionados %}
+                <div class="col-md-4 mb-3">
+                    <div class="card product-card h-100">
+                        {% if produto_rel.imagem %}
+                            <img src="{{ produto_rel.imagem.url }}" class="card-img-top product-image" alt="{{ produto_rel.nome }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title">{{ produto_rel.nome }}</h6>
+                            <p class="card-text text-dark small">
+                                {{ produto_rel.descricao|truncatechars:80 }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="price-tag">MT {{ produto_rel.preco }}</span>
+                                <a href="{% url 'sweets:produto_detalhe' produto_rel.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>Ver
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+.star-rating-large i {
+    font-size: 1.2em !important;
+    color: #ffc107 !important;
+}
+.star-rating-large .far.fa-star {
+    color: #e0e0e0 !important;
+}
+</style>
+<script>
+document.getElementById('add-to-cart-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = this;
+    const formData = new FormData(form);
+    const button = form.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adicionando...';
+    button.disabled = true;
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            form.parentNode.insertBefore(alertDiv, form.nextSibling);
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        } else {
+            throw new Error('Erro ao adicionar ao carrinho');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+        alertDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>Erro ao adicionar ao carrinho. Tente novamente.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        form.parentNode.insertBefore(alertDiv, form.nextSibling);
+    })
+    .finally(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+});
+</script>
+{% endblock %}

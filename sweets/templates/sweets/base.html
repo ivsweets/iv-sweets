@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts - Angelina e Grand Hotel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Angelina&family=Grand+Hotel&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #e05a47;
+            --secondary-color: #ffde59;
+            --dark-color: #5e0214;
+            --skin-color: #9b3e29;
+            --black-color: #000000;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            font-size: 14px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-family: 'Angelina', cursive;
+            font-size: 2rem;
+            color: var(--secondary-color) !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand:hover {
+            color: white !important;
+        }
+
+        .navbar-nav .nav-link {
+            font-family: 'Grand Hotel', cursive;
+            font-size: 1.2rem;
+            color: var(--secondary-color) !important;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+
+        /* Botões */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-color);
+            border-color: var(--dark-color);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Cards */
+        .card {
+            border: 2px solid var(--secondary-color);
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(224, 90, 71, 0.3);
+        }
+
+        /* Image sizes */
+        .product-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .img-fluid {
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        /* Preços */
+        .price-tag {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Seções */
+        .section-title {
+            font-family: 'Grand Hotel', cursive;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-family: 'Angelina', cursive;
+            font-size: 3rem;
+            color: var(--secondary-color);
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .hero-subtitle {
+            font-family: 'Grand Hotel', cursive;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--dark-color) 0%, var(--primary-color) 100%);
+            color: var(--secondary-color);
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer h5 {
+            font-family: 'Angelina', cursive;
+            font-size: 1.5rem;
+        }
+
+        /* Login/Logout buttons */
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .auth-buttons .btn {
+            font-size: 0.9rem;
+        }
+
+        /* Alertas */
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container" style="position: relative;">
+            {% if 'chat' not in request.resolver_match.url_name %}
+            <a class="navbar-brand" href="{% url 'sweets:index' %}">
+                <img src="{% static 'images/logo.png' %}" alt="iv_Sweets" style="height: 40px; width: auto;">
+            </a>
+            {% else %}
+            <a class="navbar-brand" href="{% url 'sweets:index' %}">
+                <span>🍰 IV Sweets</span>
+            </a>
+            {% endif %}
+            {% if request.resolver_match.url_name == 'index' and not user.is_authenticated %}
+            <a href="{% url 'sweets:admin_login' %}" class="btn admin-dot" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--primary-color); color: white; font-size: 24px; z-index: 10; display: flex; align-items: center; justify-content: center; text-decoration: none;">●</a>
+            {% endif %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'sweets:index' %}">
+                            <i class="fas fa-home me-1"></i>Início
+                        </a>
+                    </li>
+                    {% if user.is_authenticated and not user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'sweets:sobre_nos' %}">
+                            <i class="fas fa-info-circle me-1"></i>Sobre Nós
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'sweets:pagamentos' %}">
+                            <i class="fas fa-credit-card me-1"></i>Pagamentos
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Real-time Clock -->
+                <div class="navbar-text me-3" style="color: var(--secondary-color); font-size: 1.2rem; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+                    <i class="fas fa-clock me-1"></i>
+                    <span id="currentDateTime"></span>
+                </div>
+
+                <!-- Authentication Buttons -->
+                <div class="auth-buttons">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-1"></i>{{ user.username }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                {% if user.is_authenticated and not user.is_staff %}
+                                <li><a class="dropdown-item" href="{% url 'sweets:carrinho' %}">
+                                    <i class="fas fa-shopping-cart me-2"></i>Carrinho
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'sweets:minhas_encomendas' %}">
+                                    <i class="fas fa-box me-2"></i>Encomendas
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'sweets:user_chat' %}">
+                                    <i class="fas fa-comments me-2"></i>Chat
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'sweets:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Sair
+                                </a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'sweets:login' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>Entrar
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>🍰 iv_Sweets</h5>
+                    <p>Os melhores bolos artesanais de Moçambique</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>📍 Localização</h5>
+                    <p>Maputo, Moçambique</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>📞 Contato</h5>
+                    <p>Email: info{% verbatim %}@{% endverbatim %}ivsweets.co.mz<br>
+                       Tel: +258 875914693
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: var(--secondary-color);">
+            <div class="text-center">
+                <p>&copy; 2024 iv_Sweets. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Admin Login Modal -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-labelledby="adminLoginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="adminLoginModalLabel">Acesso Restrito</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'sweets:admin_login' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nome de Usuário</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Real-time Clock Script -->
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const dateTimeString = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('currentDateTime').textContent = dateTimeString;
+        }
+
+        // Update clock immediately and then every second
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

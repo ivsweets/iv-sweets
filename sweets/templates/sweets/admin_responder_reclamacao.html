@@ -1,0 +1,31 @@
+{% extends 'sweets/base.html' %}
+{% load static %}
+
+{% block title %}Responder Reclamação - IV Sweets{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Responder à Reclamação</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Detalhes da Reclamação</h5>
+        </div>
+        <div class="card-body">
+            <h6>{{ reclamacao.titulo }}</h6>
+            <p>{{ reclamacao.descricao }}</p>
+            <small class="text-muted">Submetida por {{ reclamacao.cliente.username }} em {{ reclamacao.data_criacao|date:"d/m/Y H:i" }}</small>
+        </div>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="resposta" class="form-label">Resposta</label>
+            <textarea class="form-control" id="resposta" name="resposta" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar Resposta</button>
+        <a href="{% url 'admin_reclamacao_detalhe' reclamacao.id %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

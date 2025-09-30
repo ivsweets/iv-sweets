@@ -1,0 +1,153 @@
+{% extends "sweets/base_corrigido_final.html" %}
+
+{% block title %}Compartilhar iv_Sweets - Sistema de Bolos Artesanais{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-body text-center p-5">
+                        <div class="mb-4">
+                            <i class="fas fa-birthday-cake fa-4x text-primary mb-3"></i>
+                            <h1 class="h2 mb-3">🍰 iv_Sweets</h1>
+                            <h2 class="h4 text-muted mb-4">Sistema de Bolos Artesanais</h2>
+                        </div>
+
+                        <div class="alert alert-success mb-4">
+                            <h5 class="alert-heading mb-3">
+                                <i class="fas fa-share-alt me-2"></i>
+                                Compartilhar nas Redes Sociais
+                            </h5>
+                            <p class="mb-0">
+                                Aqui está o link público para compartilhar o sistema iv_Sweets com seus amigos e familiares!
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>🔗 Link para Compartilhar:</h5>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control form-control-lg"
+                                       id="shareUrl" value="{{ public_url }}" readonly>
+                                <button class="btn btn-primary" type="button" onclick="copyToClipboard()">
+                                    <i class="fas fa-copy me-2"></i>Copiar Link
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5>📱 Compartilhar em:</h5>
+                            </div>
+
+                            <!-- WhatsApp -->
+                            <div class="col-md-4 col-sm-6">
+                                <a href="https://wa.me/?text={{ public_url|urlencode }}%20-%20Sistema%20de%20Bolos%20Artesanais%20iv_Sweets%20🍰"
+                                   class="btn btn-success w-100" target="_blank">
+                                    <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                                </a>
+                            </div>
+
+                            <!-- Facebook -->
+                            <div class="col-md-4 col-sm-6">
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ public_url|urlencode }}"
+                                   class="btn btn-primary w-100" target="_blank">
+                                    <i class="fab fa-facebook-f me-2"></i>Facebook
+                                </a>
+                            </div>
+
+                            <!-- Twitter/X -->
+                            <div class="col-md-4 col-sm-6">
+                                <a href="https://twitter.com/intent/tweet?text={{ public_url|urlencode }}%20-%20Sistema%20de%20Bolos%20Artesanais%20iv_Sweets%20🍰"
+                                   class="btn btn-info w-100" target="_blank">
+                                    <i class="fab fa-twitter me-2"></i>Twitter/X
+                                </a>
+                            </div>
+
+                            <!-- Instagram (link para perfil) -->
+                            <div class="col-md-4 col-sm-6">
+                                <a href="https://www.instagram.com/"
+                                   class="btn btn-danger w-100" target="_blank">
+                                    <i class="fab fa-instagram me-2"></i>Instagram
+                                </a>
+                            </div>
+
+                            <!-- LinkedIn -->
+                            <div class="col-md-4 col-sm-6">
+                                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ public_url|urlencode }}"
+                                   class="btn btn-primary w-100" target="_blank">
+                                    <i class="fab fa-linkedin-in me-2"></i>LinkedIn
+                                </a>
+                            </div>
+
+                            <!-- Telegram -->
+                            <div class="col-md-4 col-sm-6">
+                                <a href="https://t.me/share/url?url={{ public_url|urlencode }}&text=Sistema%20de%20Bolos%20Artesanais%20iv_Sweets%20🍰"
+                                   class="btn btn-primary w-100" target="_blank">
+                                    <i class="fab fa-telegram-plane me-2"></i>Telegram
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="border-top pt-4">
+                            <h5 class="mb-3">🎂 Sobre o Sistema</h5>
+                            <div class="row text-start">
+                                <div class="col-md-6">
+                                    <h6>Funcionalidades:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Catálogo de produtos</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Sistema de carrinho</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Encomendas online</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Avaliações de produtos</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Contato:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-envelope me-2"></i>ivsweets50@gmail.com</li>
+                                        <li><i class="fas fa-phone me-2"></i>+258 875914693</li>
+                                        <li><i class="fas fa-map-marker-alt me-2"></i>Maputo, Moçambique</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="/" class="btn btn-outline-primary">
+                                <i class="fas fa-home me-2"></i>Visitar Sistema
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function copyToClipboard() {
+    const copyText = document.getElementById("shareUrl");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+
+    navigator.clipboard.writeText(copyText.value).then(function() {
+        // Show success message
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check me-2"></i>Copiado!';
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-success');
+
+        setTimeout(function() {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-primary');
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Erro ao copiar: ', err);
+        alert('Erro ao copiar link. Selecione e copie manualmente.');
+    });
+}
+</script>
+{% endblock %}
