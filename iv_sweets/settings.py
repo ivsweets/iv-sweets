@@ -20,12 +20,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-q0miz-a^8m=*3zjoi@eoq1sa0)&p_l**a6634$mgwu4j1f&*st'
+import os
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-q0miz-a^8m=*3zjoi@eoq1sa0)&p_l**a6634$mgwu4j1f&*st')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else []
 
 
 # Application definition
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add whitenoise middleware for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -105,6 +107,9 @@ LOGIN_URL = '/login/'
 
 STATIC_URL = 'static/'
 
+# Add STATIC_ROOT for collectstatic
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -119,6 +124,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-gmail@example.com'  # Replace with your Gmail address
-EMAIL_HOST_PASSWORD = 'your-app-password'  # Replace with Gmail App Password (not regular password)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-gmail@example.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'your-app-password')
 DEFAULT_FROM_EMAIL = 'noreply@ivsweets.com'
