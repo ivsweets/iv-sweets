@@ -1,7 +1,7 @@
 services:
   - type: web
     name: iv-sweets
-    runtime: python3.11
+    runtime: python3.11.4
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn iv_sweets.wsgi:application
     envVars:
@@ -10,8 +10,8 @@ services:
       - key: DEBUG
         value: False
       - key: ALLOWED_HOSTS
-        value: your-render-app-url.onrender.com
+        value: iv_sweets.onrender.com
       - key: EMAIL_HOST_USER
-        value: your-gmail@example.com
+        value: ivsweets50@gmail.com
       - key: EMAIL_HOST_PASSWORD
         value: your-app-password
